@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Volunteer | Greer Soup Kitchen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">
+        <img src="logo.jpg" alt="Daily Bread Ministries, Greer Soup Kitchen logo">
+        <span>
+          <span class="brand-name">Daily Bread Ministries</span>
+          <span class="brand-tagline">Serving Greer since 1990</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="volunteer.html" aria-current="page">Volunteer</a></li>
+          <li><a href="donate.html">Donate</a></li>
+          <li><a href="get-help.html">Get Help</a></li>
+          <li><a class="nav-staff" href="staff-login.html">Staff Login</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="narrow">
+    <h1>Volunteer sign-up</h1>
+    <p class="lead">Thank you for wanting to help. Fill out this form and someone from our team will contact you.</p>
+
+    <div id="volunteer-success" class="success-panel" tabindex="-1" hidden>
+      <h2>Thank you for signing up!</h2>
+      <p>We got your information. Someone from our team will call or email you soon to set up your first day.</p>
+      <a class="button" href="index.html">Back to home</a>
+    </div>
+
+    <form class="form" data-validate data-success="volunteer-success">
+      <div class="error-summary" tabindex="-1" role="alert">
+        <h2>Please fix these items</h2>
+        <ul></ul>
+      </div>
+
+      <div class="field">
+        <label for="first-name">First name</label>
+        <input type="text" id="first-name" name="first_name" autocomplete="given-name" required data-error="Enter your first name">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="last-name">Last name</label>
+        <input type="text" id="last-name" name="last_name" autocomplete="family-name" required data-error="Enter your last name">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="email">Email address</label>
+        <span class="hint" id="email-hint">If you have given to us before, use the same email so we can keep your records together.</span>
+        <input type="email" id="email" name="email" autocomplete="email" aria-describedby="email-hint" required data-error="Enter your email address">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone number</label>
+        <input type="tel" id="phone" name="phone" autocomplete="tel" required data-error="Enter your phone number">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="address">Mailing address <span class="optional">(optional)</span></label>
+        <input type="text" id="address" name="address" autocomplete="street-address">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="age-group">Age group <span class="optional">(optional)</span></label>
+        <select id="age-group" name="age_group">
+          <option value="">Choose one</option>
+          <option>Under 18</option>
+          <option>18 to 29</option>
+          <option>30 to 49</option>
+          <option>50 to 64</option>
+          <option>65 to 79</option>
+          <option>80 or older</option>
+        </select>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <fieldset data-required data-error="Pick at least one time you can help">
+          <legend>When can you help?</legend>
+          <span class="hint">Pick all that work for you.</span>
+          <div class="choices">
+            <label class="choice" for="avail-weekday"><input type="checkbox" id="avail-weekday" name="availability" value="weekday-morning"> Weekday mornings (Mon to Fri, 8 AM to 1 PM)</label>
+            <label class="choice" for="avail-saturday"><input type="checkbox" id="avail-saturday" name="availability" value="saturday-morning"> Saturday mornings (8 AM to 1 PM)</label>
+            <label class="choice" for="avail-sunday"><input type="checkbox" id="avail-sunday" name="availability" value="sunday-supper"> Sunday supper (4 PM to 5:30 PM)</label>
+            <label class="choice" for="avail-step"><input type="checkbox" id="avail-step" name="availability" value="step"> Helping STEP families (times vary)</label>
+          </div>
+        </fieldset>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <fieldset>
+          <legend>What would you like to help with? <span class="optional">(optional)</span></legend>
+          <div class="choices">
+            <label class="choice" for="skill-cooking"><input type="checkbox" id="skill-cooking" name="skills" value="cooking"> Cooking</label>
+            <label class="choice" for="skill-serving"><input type="checkbox" id="skill-serving" name="skills" value="serving"> Serving meals</label>
+            <label class="choice" for="skill-cleaning"><input type="checkbox" id="skill-cleaning" name="skills" value="cleaning"> Cleaning up</label>
+            <label class="choice" for="skill-mentoring"><input type="checkbox" id="skill-mentoring" name="skills" value="mentoring"> Mentoring or job help for STEP families</label>
+            <label class="choice" for="skill-office"><input type="checkbox" id="skill-office" name="skills" value="office"> Office or computer work</label>
+          </div>
+        </fieldset>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="notes">Anything else we should know? <span class="optional">(optional)</span></label>
+        <span class="hint" id="notes-hint">Other skills, a group you are coming with, or times that do not fit above.</span>
+        <textarea id="notes" name="notes" aria-describedby="notes-hint"></textarea>
+        <p class="field-error"></p>
+      </div>
+
+      <button type="submit" class="button button-wide">Send my sign-up</button>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    <p>Daily Bread Ministries &middot; Greer Soup Kitchen &amp; Greer STEP &middot; Greer, South Carolina</p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

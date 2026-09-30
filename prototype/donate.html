@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donate | Greer Soup Kitchen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">
+        <img src="logo.jpg" alt="Daily Bread Ministries, Greer Soup Kitchen logo">
+        <span>
+          <span class="brand-name">Daily Bread Ministries</span>
+          <span class="brand-tagline">Serving Greer since 1990</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="volunteer.html">Volunteer</a></li>
+          <li><a href="donate.html" aria-current="page">Donate</a></li>
+          <li><a href="get-help.html">Get Help</a></li>
+          <li><a class="nav-staff" href="staff-login.html">Staff Login</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="narrow">
+    <h1>Donor form</h1>
+    <p class="lead">Thank you for supporting the Greer Soup Kitchen and Greer STEP. Please tell us a little about yourself so we can thank you and keep you updated.</p>
+
+    <div class="note">
+      <p><strong>Ways to give:</strong></p>
+      <p>Online with PayPal (button shown after you send this form), or mail a check to Daily Bread Ministries, PO Box 2344, Greer, SC 29652.</p>
+    </div>
+
+    <div id="donor-success" class="success-panel" tabindex="-1" hidden>
+      <h2>Thank you!</h2>
+      <p>We got your information. If you would like to give online now, use the button below.</p>
+      <p><a class="button" href="#" aria-disabled="true">Give with PayPal (coming soon)</a></p>
+      <p><a href="index.html">Back to home</a></p>
+    </div>
+
+    <form class="form" data-validate data-success="donor-success">
+      <div class="error-summary" tabindex="-1" role="alert">
+        <h2>Please fix these items</h2>
+        <ul></ul>
+      </div>
+
+      <div class="field">
+        <label for="first-name">First name</label>
+        <input type="text" id="first-name" name="first_name" autocomplete="given-name" required data-error="Enter your first name">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="last-name">Last name</label>
+        <input type="text" id="last-name" name="last_name" autocomplete="family-name" required data-error="Enter your last name">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="email">Email address</label>
+        <span class="hint" id="email-hint">Use the same email you give PayPal so we can match your gifts.</span>
+        <input type="email" id="email" name="email" autocomplete="email" aria-describedby="email-hint" required data-error="Enter your email address">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone number <span class="optional">(optional)</span></label>
+        <input type="tel" id="phone" name="phone" autocomplete="tel">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="address">Mailing address <span class="optional">(optional)</span></label>
+        <span class="hint" id="address-hint">Needed if you want thank-you letters or the newsletter by mail.</span>
+        <input type="text" id="address" name="address" autocomplete="street-address" aria-describedby="address-hint">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="city">Town or city you live in</label>
+        <input type="text" id="city" name="city" autocomplete="address-level2" required data-error="Enter the town or city you live in">
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="age-group">Age group</label>
+        <select id="age-group" name="age_group" required data-error="Choose your age group">
+          <option value="">Choose one</option>
+          <option>Under 18</option>
+          <option>18 to 29</option>
+          <option>30 to 49</option>
+          <option>50 to 64</option>
+          <option>65 to 79</option>
+          <option>80 or older</option>
+        </select>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <fieldset data-required data-error="Choose one-time or regular giving">
+          <legend>How often do you give?</legend>
+          <div class="choices">
+            <label class="choice" for="freq-once"><input type="radio" id="freq-once" name="frequency" value="one-time"> One time</label>
+            <label class="choice" for="freq-regular"><input type="radio" id="freq-regular" name="frequency" value="recurring"> Regularly (monthly, yearly, etc.)</label>
+          </div>
+        </fieldset>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="heard">How did you hear about us? <span class="optional">(optional)</span></label>
+        <select id="heard" name="heard_from">
+          <option value="">Choose one</option>
+          <option>Friend or family</option>
+          <option>Church</option>
+          <option>Social media</option>
+          <option>Event</option>
+          <option>Newspaper or TV</option>
+          <option>Other</option>
+        </select>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <fieldset>
+          <legend>How should we contact you? <span class="optional">(optional)</span></legend>
+          <span class="hint">Pick all that are okay.</span>
+          <div class="choices">
+            <label class="choice" for="contact-email"><input type="checkbox" id="contact-email" name="contact_pref" value="email"> Email</label>
+            <label class="choice" for="contact-mail"><input type="checkbox" id="contact-mail" name="contact_pref" value="mail"> Mail</label>
+            <label class="choice" for="contact-phone"><input type="checkbox" id="contact-phone" name="contact_pref" value="phone"> Phone</label>
+          </div>
+        </fieldset>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <fieldset>
+          <legend>Would you like our quarterly newsletter?</legend>
+          <div class="choices">
+            <label class="choice" for="news-yes"><input type="radio" id="news-yes" name="newsletter" value="yes"> Yes, please</label>
+            <label class="choice" for="news-no"><input type="radio" id="news-no" name="newsletter" value="no"> No, thank you</label>
+          </div>
+        </fieldset>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field">
+        <fieldset data-reveal="honor-name-field">
+          <legend>Is your gift in honor or memory of someone? <span class="optional">(optional)</span></legend>
+          <div class="choices">
+            <label class="choice" for="tribute-no"><input type="radio" id="tribute-no" name="tribute" value="no"> No</label>
+            <label class="choice" for="tribute-honor"><input type="radio" id="tribute-honor" name="tribute" value="honor"> In honor of someone</label>
+            <label class="choice" for="tribute-memory"><input type="radio" id="tribute-memory" name="tribute" value="memory"> In memory of someone</label>
+          </div>
+        </fieldset>
+        <p class="field-error"></p>
+      </div>
+
+      <div class="field" id="honor-name-field" hidden>
+        <label for="honor-name">Their name</label>
+        <input type="text" id="honor-name" name="tribute_name">
+        <p class="field-error"></p>
+      </div>
+
+      <button type="submit" class="button button-wide">Send donor form</button>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    <p>Daily Bread Ministries &middot; Greer Soup Kitchen &amp; Greer STEP &middot; Greer, South Carolina</p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
