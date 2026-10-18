@@ -16,6 +16,7 @@ create table if not exists donations (
   person_id uuid references people (id) on delete set null,
   amount numeric(10, 2) not null check (amount > 0),
   currency text not null default 'USD',
+    instrument_type text,
   donated_at timestamptz not null,
   source text not null check (source in ('paypal', 'manual')),
   -- PayPal capture id. Unique, so a repeated webhook can never save a gift twice.
@@ -26,6 +27,7 @@ create table if not exists donations (
   created_at timestamptz not null default now()
 );
 
+alter table donations add column if not exists instrument_type text;
 create index if not exists donations_person_id_idx on donations (person_id);
 create index if not exists donations_donated_at_idx on donations (donated_at);
 
@@ -37,6 +39,7 @@ alter table donations enable row level security;
 -- Saves one PayPal gift. Finds or creates the person by email, then adds the
 -- donation unless that PayPal transaction is already saved.
 -- Returns true if a new donation was added.
+drop function if exists record_paypal_donation(text, text, text, numeric, text, timestamptz, text, text);
 create or replace function record_paypal_donation(
   p_email text,
   p_first_name text,
@@ -45,7 +48,8 @@ create or replace function record_paypal_donation(
   p_currency text,
   p_donated_at timestamptz,
   p_txn_id text,
-  p_event_id text
+  p_event_id text,
+  p_instrument_type text default null
 ) returns boolean
 language plpgsql
 security definer
@@ -64,9 +68,9 @@ begin
     select id into v_person_id from people where email = v_email;
   end if;
 
-  insert into donations (person_id, amount, currency, donated_at, source, paypal_txn_id, paypal_event_id)
-  values (v_person_id, p_amount, p_currency, p_donated_at, 'paypal', p_txn_id, p_event_id)
-  on conflict (paypal_txn_id) do nothing;
+    insert into donations (person_id, amount, currency, instrument_type, donated_at, source, paypal_txn_id, paypal_event_id)
+    values (v_person_id, p_amount, p_currency, p_instrument_type, p_donated_at, 'paypal', p_txn_id, p_event_id)
+    on conflict (paypal_txn_id) do nothing;
 
   get diagnostics v_added = row_count;
   return v_added > 0;

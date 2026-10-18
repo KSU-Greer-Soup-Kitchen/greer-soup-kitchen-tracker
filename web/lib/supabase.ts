@@ -30,6 +30,7 @@ export async function savePayPalDonation(donation: DonationToSave): Promise<bool
     p_donated_at: donation.donatedAt,
     p_txn_id: donation.txnId,
     p_event_id: donation.eventId,
+    p_instrument_type: donation.payer.instrumentType,
   });
   if (error) {
     throw new Error(`Could not save donation: ${error.message}`);

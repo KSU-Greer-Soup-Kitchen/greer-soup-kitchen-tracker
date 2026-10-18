@@ -16,6 +16,7 @@ export type Payer = {
   email: string | null;
   firstName: string | null;
   lastName: string | null;
+  instrumentType: string | null;
 };
 
 export function readPayPalConfig(env: Record<string, string | undefined> = process.env): PayPalConfig {
@@ -108,10 +109,12 @@ export async function getOrderPayer(orderId: string, config: PayPalConfig): Prom
   }
   const order = (await res.json()) as {
     payer?: { email_address?: string; name?: { given_name?: string; surname?: string } };
+    payment_source?: Record<string, unknown>
   };
   return {
     email: order.payer?.email_address ?? null,
     firstName: order.payer?.name?.given_name ?? null,
     lastName: order.payer?.name?.surname ?? null,
+    instrumentType: Object.keys(order.payment_source ?? {})[0]?.toUpperCase() ?? null
   };
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { handlePayPalEvent, readCompletedCapture, type DonationToSave, type PayPalEvent } from "./donations";
 
-// Trimmed copy of a real PAYMENT.CAPTURE.COMPLETED event
+// PAYMENT.CAPTURE.COMPLETED event
 function captureEvent(overrides: Record<string, unknown> = {}): PayPalEvent {
   return {
     id: "WH-TEST-1",
@@ -17,7 +17,7 @@ function captureEvent(overrides: Record<string, unknown> = {}): PayPalEvent {
   };
 }
 
-const payer = { email: "donor@example.com", firstName: "Test", lastName: "Donor" };
+const payer = { email: "donor@example.com", firstName: "Test", lastName: "Donor", instrumentType: "PAYPAL"};
 
 describe("readCompletedCapture", () => {
   it("reads the gift details", () => {

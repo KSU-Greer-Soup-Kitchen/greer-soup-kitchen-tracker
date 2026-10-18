@@ -30,7 +30,7 @@ export type Deps = {
   saveDonation: (donation: DonationToSave) => Promise<boolean>;
 };
 
-const NO_PAYER: Payer = { email: null, firstName: null, lastName: null };
+const NO_PAYER: Payer = { email: null, firstName: null, lastName: null, instrumentType: null }
 
 // Pulls the money details out of a PAYMENT.CAPTURE.COMPLETED event.
 // Returns null for any other event, or one missing the fields we need.
