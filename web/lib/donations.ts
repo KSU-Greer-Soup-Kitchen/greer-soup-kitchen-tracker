@@ -1,7 +1,7 @@
 // Turns a PayPal webhook event into a saved donation (FR-4).
 // The PayPal and database calls are passed in so this logic can be tested on its own.
 
-import type { Payer } from "./paypal";
+import type { OrderDetails, Payer, PayPalPaymentMethod } from "./paypal";
 
 export type PayPalEvent = {
   id?: string;
@@ -20,17 +20,18 @@ export type CompletedCapture = {
 export type DonationToSave = CompletedCapture & {
   eventId: string | null;
   payer: Payer;
+  paymentMethod: PayPalPaymentMethod | null;
 };
 
 export type HandleResult = "saved" | "duplicate" | "ignored";
 
 export type Deps = {
-  getPayer: (orderId: string) => Promise<Payer>;
+  getOrderDetails: (orderId: string) => Promise<OrderDetails>;
   // Returns true if a new row was added, false if this transaction was already saved
   saveDonation: (donation: DonationToSave) => Promise<boolean>;
 };
 
-const NO_PAYER: Payer = { email: null, firstName: null, lastName: null, instrumentType: null }
+const NO_DETAILS: OrderDetails = { payer: { email: null, firstName: null, lastName: null }, paymentMethod: null };
 
 // Pulls the money details out of a PAYMENT.CAPTURE.COMPLETED event.
 // Returns null for any other event, or one missing the fields we need.
@@ -63,7 +64,7 @@ export async function handlePayPalEvent(event: PayPalEvent, deps: Deps): Promise
   if (!capture) {
     return "ignored";
   }
-  const payer = capture.orderId ? await deps.getPayer(capture.orderId) : NO_PAYER;
-  const added = await deps.saveDonation({ ...capture, eventId: event.id ?? null, payer });
+  const details = capture.orderId ? await deps.getOrderDetails(capture.orderId) : NO_DETAILS;
+  const added = await deps.saveDonation({ ...capture, eventId: event.id ?? null, ...details });
   return added ? "saved" : "duplicate";
 }

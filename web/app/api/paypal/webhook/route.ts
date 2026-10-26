@@ -3,7 +3,7 @@
 // which is what we want when the database or PayPal is briefly down.
 
 import { handlePayPalEvent, type PayPalEvent } from "../../../../lib/donations";
-import { getOrderPayer, readPayPalConfig, verifyWebhookSignature } from "../../../../lib/paypal";
+import { getOrderDetails, readPayPalConfig, verifyWebhookSignature } from "../../../../lib/paypal";
 import { savePayPalDonation } from "../../../../lib/supabase";
 
 export const runtime = "nodejs";
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await handlePayPalEvent(event, {
-      getPayer: (orderId) => getOrderPayer(orderId, config),
+      getOrderDetails: (orderId) => getOrderDetails(orderId, config),
       saveDonation: savePayPalDonation,
     });
     // Log the event id and outcome only, never donor details

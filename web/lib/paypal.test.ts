@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { readPayPalConfig, verifyWebhookSignature } from "./paypal";
+import { paymentMethodFromSource, readPayPalConfig, verifyWebhookSignature } from "./paypal";
 
 const config = {
   baseUrl: "https://api-m.sandbox.paypal.com",
@@ -62,5 +62,23 @@ describe("readPayPalConfig", () => {
 
   it("fails clearly when a setting is missing", () => {
     expect(() => readPayPalConfig({})).toThrow(/PAYPAL_CLIENT_ID/);
+  });
+});
+
+describe("paymentMethodFromSource", () => {
+  it("names how the donor paid inside PayPal", () => {
+    expect(paymentMethodFromSource({ paypal: { email_address: "a@b.co" } })).toBe("paypal");
+    expect(paymentMethodFromSource({ venmo: {} })).toBe("venmo");
+    expect(paymentMethodFromSource({ card: { last_digits: "1111" } })).toBe("card");
+    expect(paymentMethodFromSource({ apple_pay: {} })).toBe("apple_pay");
+  });
+
+  it("uses other for a payment type we do not list", () => {
+    expect(paymentMethodFromSource({ ideal: {} })).toBe("other");
+  });
+
+  it("returns null when PayPal does not say", () => {
+    expect(paymentMethodFromSource(undefined)).toBeNull();
+    expect(paymentMethodFromSource({})).toBeNull();
   });
 });

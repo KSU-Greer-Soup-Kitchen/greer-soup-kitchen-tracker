@@ -16,7 +16,6 @@ export type Payer = {
   email: string | null;
   firstName: string | null;
   lastName: string | null;
-  instrumentType: string | null;
 };
 
 export function readPayPalConfig(env: Record<string, string | undefined> = process.env): PayPalConfig {
@@ -98,8 +97,30 @@ export async function verifyWebhookSignature(
   return data.verification_status === "SUCCESS";
 }
 
-// A capture event doesn't include the donor's email, so look it up on the order.
-export async function getOrderPayer(orderId: string, config: PayPalConfig): Promise<Payer> {
+// How the donor paid inside PayPal. Matches the payment_method values in the database.
+export type PayPalPaymentMethod = "paypal" | "venmo" | "card" | "apple_pay" | "google_pay" | "other";
+
+export type OrderDetails = {
+  payer: Payer;
+  paymentMethod: PayPalPaymentMethod | null;
+};
+
+// PayPal names the way the donor paid as the one key under payment_source,
+// e.g. { payment_source: { venmo: {...} } }.
+export function paymentMethodFromSource(paymentSource: unknown): PayPalPaymentMethod | null {
+  if (!paymentSource || typeof paymentSource !== "object") {
+    return null;
+  }
+  const key = Object.keys(paymentSource)[0];
+  if (!key) {
+    return null;
+  }
+  const known: PayPalPaymentMethod[] = ["paypal", "venmo", "card", "apple_pay", "google_pay"];
+  return known.includes(key as PayPalPaymentMethod) ? (key as PayPalPaymentMethod) : "other";
+}
+
+// A capture event doesn't include the donor's email or how they paid, so look both up on the order.
+export async function getOrderDetails(orderId: string, config: PayPalConfig): Promise<OrderDetails> {
   const token = await getAccessToken(config);
   const res = await fetch(`${config.baseUrl}/v2/checkout/orders/${encodeURIComponent(orderId)}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -109,12 +130,14 @@ export async function getOrderPayer(orderId: string, config: PayPalConfig): Prom
   }
   const order = (await res.json()) as {
     payer?: { email_address?: string; name?: { given_name?: string; surname?: string } };
-    payment_source?: Record<string, unknown>
+    payment_source?: unknown;
   };
   return {
-    email: order.payer?.email_address ?? null,
-    firstName: order.payer?.name?.given_name ?? null,
-    lastName: order.payer?.name?.surname ?? null,
-    instrumentType: Object.keys(order.payment_source ?? {})[0]?.toUpperCase() ?? null
+    payer: {
+      email: order.payer?.email_address ?? null,
+      firstName: order.payer?.name?.given_name ?? null,
+      lastName: order.payer?.name?.surname ?? null,
+    },
+    paymentMethod: paymentMethodFromSource(order.payment_source),
   };
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { handlePayPalEvent, readCompletedCapture, type DonationToSave, type PayPalEvent } from "./donations";
 
-// PAYMENT.CAPTURE.COMPLETED event
+// Trimmed copy of a real PAYMENT.CAPTURE.COMPLETED event
 function captureEvent(overrides: Record<string, unknown> = {}): PayPalEvent {
   return {
     id: "WH-TEST-1",
@@ -17,7 +17,8 @@ function captureEvent(overrides: Record<string, unknown> = {}): PayPalEvent {
   };
 }
 
-const payer = { email: "donor@example.com", firstName: "Test", lastName: "Donor", instrumentType: "PAYPAL"};
+const payer = { email: "donor@example.com", firstName: "Test", lastName: "Donor" };
+const details = { payer, paymentMethod: "venmo" as const };
 
 describe("readCompletedCapture", () => {
   it("reads the gift details", () => {
@@ -45,40 +46,41 @@ describe("readCompletedCapture", () => {
 });
 
 describe("handlePayPalEvent", () => {
-  it("looks up the payer and saves a new gift", async () => {
-    const getPayer = vi.fn().mockResolvedValue(payer);
+  it("looks up the payer and payment method, then saves a new gift", async () => {
+    const getOrderDetails = vi.fn().mockResolvedValue(details);
     const saveDonation = vi.fn().mockResolvedValue(true);
 
-    const result = await handlePayPalEvent(captureEvent(), { getPayer, saveDonation });
+    const result = await handlePayPalEvent(captureEvent(), { getOrderDetails, saveDonation });
 
     expect(result).toBe("saved");
-    expect(getPayer).toHaveBeenCalledWith("ORDER-9");
+    expect(getOrderDetails).toHaveBeenCalledWith("ORDER-9");
     const saved: DonationToSave = saveDonation.mock.calls[0][0];
-    expect(saved).toMatchObject({ txnId: "CAPTURE-123", amount: 25, eventId: "WH-TEST-1", payer });
+    expect(saved).toMatchObject({ txnId: "CAPTURE-123", amount: 25, eventId: "WH-TEST-1", payer, paymentMethod: "venmo" });
   });
 
   it("reports a repeat of the same transaction as a duplicate", async () => {
     const result = await handlePayPalEvent(captureEvent(), {
-      getPayer: vi.fn().mockResolvedValue(payer),
+      getOrderDetails: vi.fn().mockResolvedValue(details),
       saveDonation: vi.fn().mockResolvedValue(false),
     });
     expect(result).toBe("duplicate");
   });
 
   it("still saves the gift when there is no order to look up", async () => {
-    const getPayer = vi.fn();
+    const getOrderDetails = vi.fn();
     const saveDonation = vi.fn().mockResolvedValue(true);
 
-    const result = await handlePayPalEvent(captureEvent({ supplementary_data: undefined }), { getPayer, saveDonation });
+    const result = await handlePayPalEvent(captureEvent({ supplementary_data: undefined }), { getOrderDetails, saveDonation });
 
     expect(result).toBe("saved");
-    expect(getPayer).not.toHaveBeenCalled();
+    expect(getOrderDetails).not.toHaveBeenCalled();
     expect(saveDonation.mock.calls[0][0].payer.email).toBeNull();
+    expect(saveDonation.mock.calls[0][0].paymentMethod).toBeNull();
   });
 
   it("does nothing for events it does not handle", async () => {
     const saveDonation = vi.fn();
-    const result = await handlePayPalEvent({ event_type: "CHECKOUT.ORDER.APPROVED" }, { getPayer: vi.fn(), saveDonation });
+    const result = await handlePayPalEvent({ event_type: "CHECKOUT.ORDER.APPROVED" }, { getOrderDetails: vi.fn(), saveDonation });
     expect(result).toBe("ignored");
     expect(saveDonation).not.toHaveBeenCalled();
   });
