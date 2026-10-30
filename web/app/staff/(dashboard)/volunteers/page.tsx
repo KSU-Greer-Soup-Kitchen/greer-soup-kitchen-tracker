@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { hours, shortDate, today } from "../../../../lib/format";
-import { AVAILABILITY, labelFor, SKILLS } from "../../../../lib/options";
+import { AVAILABILITY, labelFor, SKILLS, VOLUNTEER_PROGRAMS } from "../../../../lib/options";
 import { fullName, listRecentShifts, listVolunteers } from "../../../../lib/staff-data";
 import { deleteShift, setVolunteerActive } from "../../actions";
 import { PageHead, PersonLink } from "../bits";
@@ -48,6 +48,7 @@ export default async function VolunteersPage({ searchParams }: { searchParams: P
                 <tr>
                   <th scope="col">Name</th>
                   <th scope="col">Contact</th>
+                  <th scope="col">Volunteering for</th>
                   <th scope="col">Can help</th>
                   <th scope="col" className="num">
                     This month
@@ -72,6 +73,16 @@ export default async function VolunteersPage({ searchParams }: { searchParams: P
                           <a href={`mailto:${v.people.email}`}>{v.people.email}</a>
                         </div>
                       )}
+                    </td>
+                    <td>
+                      {v.program ? labelFor(VOLUNTEER_PROGRAMS, v.program) : <span className="muted">Not given</span>}
+                      {v.bookings.map((b) => (
+                        <div className="muted small" key={b.day}>
+                          {shortDate(b.day)}
+                          {b.group_name && `: ${b.group_name}`}
+                          {b.group_size && ` (${b.group_size} people)`}
+                        </div>
+                      ))}
                     </td>
                     <td>
                       {v.availability.map((a) => (

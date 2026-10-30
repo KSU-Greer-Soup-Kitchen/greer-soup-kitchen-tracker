@@ -1,6 +1,6 @@
 # Greer Soup Kitchen Tracker
 
-Volunteer, donor, and assistance tracking for Daily Bread Ministries / Greer Soup Kitchen (Greer, SC).
+Volunteer, donor, and assistance tracking for Daily Bread Ministries / Greer Soup Kitchen.
 
 Built by a KSU SWE 4713 team (Fall 2026): Zach Vaughn (lead), Debora Sanchez, Joe Knight, Lydia Amrouche, Olakay Ladapo, Tristan Prater.
 
@@ -13,8 +13,7 @@ Built by a KSU SWE 4713 team (Fall 2026): Zach Vaughn (lead), Debora Sanchez, Jo
 
 ## Status
 
-Planning. Tech stack is chosen in Week 2. Tasks and milestones are tracked on the team's Trello board.
-
-## Setup
-
-Coming once the stack is picked. Secrets go in a local `.env` file (never committed); `.env.example` will list what's needed.
+Milestone 2: the public forms save to the database, staff log in to see and manage every record
+(volunteers and hours, donors and gifts, help requests, reports), and the donate page takes PayPal
+sandbox gifts. Volunteers choose STEP, Weekday Soup Kitchen, or a Weekend Group (which books an
+open weekend date), and each form can be emailed to the person in charge of it.

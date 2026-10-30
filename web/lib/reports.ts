@@ -1,4 +1,4 @@
-// Adds up the numbers for the reports page (FR-8). Kept separate so it can be tested.
+// Adds up the numbers for the reports page
 
 import { lastMonths, monthKey } from "./format";
 import { AGE_GROUPS, labelFor, PAYMENT_METHODS } from "./options";

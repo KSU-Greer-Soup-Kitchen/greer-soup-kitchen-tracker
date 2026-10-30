@@ -1,7 +1,6 @@
 "use server";
 
-// Changes staff can make from the dashboard (FR-6, FR-7).
-// Each one checks for a logged-in staff member before touching anything.
+// Changes staff can make from the dashboard
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

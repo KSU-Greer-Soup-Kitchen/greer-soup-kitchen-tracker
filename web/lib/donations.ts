@@ -1,4 +1,4 @@
-// Turns a PayPal webhook event into a saved donation (FR-4).
+// Turns a PayPal webhook event into a saved donation
 // The PayPal and database calls are passed in so this logic can be tested on its own.
 
 import type { OrderDetails, Payer, PayPalPaymentMethod } from "./paypal";

@@ -1,4 +1,4 @@
-// Small pieces used on several staff pages.
+// small pieces used on several staff pages
 
 import Link from "next/link";
 import { labelFor, NEEDS, PAYMENT_METHODS, REQUEST_STATUS } from "../../../lib/options";

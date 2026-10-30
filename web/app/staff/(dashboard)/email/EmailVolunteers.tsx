@@ -1,8 +1,6 @@
 "use client";
 
-// Write one message to many volunteers about an upcoming need or event (FR-9).
-// It opens in staff's own email program with every volunteer on BCC,
-// so volunteers never see each other's addresses.
+// write one message to many volunteers about an upcoming need or event
 
 import { useMemo, useState } from "react";
 import { AVAILABILITY } from "../../../../lib/options";

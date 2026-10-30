@@ -29,6 +29,18 @@ export function readPayPalConfig(env: Record<string, string | undefined> = proce
   return { baseUrl: API_BASE[mode], clientId, clientSecret, webhookId };
 }
 
+// The Give button (create and capture) doesn't need the webhook ID,
+// so online giving works even before the webhook is set up.
+export function readPayPalCheckoutConfig(env: Record<string, string | undefined> = process.env): PayPalConfig {
+  const mode = env.PAYPAL_ENV === "live" ? "live" : "sandbox";
+  const clientId = env.PAYPAL_CLIENT_ID;
+  const clientSecret = env.PAYPAL_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new Error("PayPal settings missing: set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET");
+  }
+  return { baseUrl: API_BASE[mode], clientId, clientSecret, webhookId: env.PAYPAL_WEBHOOK_ID ?? "" };
+}
+
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
 export async function getAccessToken(config: PayPalConfig): Promise<string> {
@@ -143,7 +155,8 @@ export async function getOrderDetails(orderId: string, config: PayPalConfig): Pr
 }
 
 // For the "Give with PayPal" button on the donate page. The donor approves the
-// order in the PayPal window, then we capture it. The webhook saves the gift.
+// order in the PayPal window, then we capture it and save the gift right away.
+// The webhook saves it too, as a backup; the capture id keeps it from being saved twice.
 export async function createDonationOrder(amount: number, config: PayPalConfig): Promise<string> {
   const token = await getAccessToken(config);
   const res = await fetch(`${config.baseUrl}/v2/checkout/orders`, {
@@ -175,17 +188,61 @@ export async function createDonationOrder(amount: number, config: PayPalConfig):
   return order.id;
 }
 
-export async function captureDonationOrder(orderId: string, config: PayPalConfig): Promise<string> {
+export type CapturedOrder = {
+  status: string;
+  // The completed payment, or null if PayPal did not finish it
+  capture: { txnId: string; amount: number; currency: string; donatedAt: string } | null;
+  details: OrderDetails;
+};
+
+// Reads PayPal's answer to a capture: the money, who paid, and how they paid.
+export function readCapturedOrder(order: unknown): CapturedOrder {
+  const o = (order ?? {}) as {
+    status?: string;
+    payer?: { email_address?: string; name?: { given_name?: string; surname?: string } };
+    payment_source?: unknown;
+    purchase_units?: {
+      payments?: {
+        captures?: { id?: string; status?: string; amount?: { value?: string; currency_code?: string }; create_time?: string }[];
+      };
+    }[];
+  };
+  const capture = o.purchase_units?.[0]?.payments?.captures?.[0];
+  const amount = Number(capture?.amount?.value);
+  return {
+    status: o.status ?? "UNKNOWN",
+    capture:
+      capture?.id && capture.status === "COMPLETED" && amount > 0
+        ? {
+            txnId: capture.id,
+            amount,
+            currency: capture.amount?.currency_code ?? "USD",
+            donatedAt: capture.create_time ?? new Date().toISOString(),
+          }
+        : null,
+    details: {
+      payer: {
+        email: o.payer?.email_address ?? null,
+        firstName: o.payer?.name?.given_name ?? null,
+        lastName: o.payer?.name?.surname ?? null,
+      },
+      paymentMethod: paymentMethodFromSource(o.payment_source),
+    },
+  };
+}
+
+export async function captureDonationOrder(orderId: string, config: PayPalConfig): Promise<CapturedOrder> {
   const token = await getAccessToken(config);
   const res = await fetch(`${config.baseUrl}/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    // return=representation makes PayPal include the payer and payment details in its answer
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", Prefer: "return=representation" },
   });
-  const data = (await res.json().catch(() => ({}))) as { status?: string; details?: { issue?: string }[] };
+  const data = (await res.json().catch(() => ({}))) as { details?: { issue?: string }[] };
   if (!res.ok) {
     throw new Error(`PayPal capture failed (${res.status} ${data.details?.[0]?.issue ?? ""})`);
   }
-  return data.status ?? "UNKNOWN";
+  return readCapturedOrder(data);
 }
 
 // Donations the button accepts, in dollars

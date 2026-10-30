@@ -1,19 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { hours, money, shortDate } from "../../../../../lib/format";
-import { AVAILABILITY, CONTACT_PREFS, GIVING_FREQUENCY, labelFor, SKILLS } from "../../../../../lib/options";
+import { AVAILABILITY, CONTACT_PREFS, GIVING_FREQUENCY, labelFor, SKILLS, VOLUNTEER_PROGRAMS } from "../../../../../lib/options";
 import { fullName, getPerson } from "../../../../../lib/staff-data";
 import { needLabel, PaidWith, StatusPill, Tribute } from "../../bits";
 import { PersonForm } from "../../StaffForms";
 
 export const metadata = { title: "Person" };
 
-// One person's whole record: every form and gift linked by their email (FR-5)
+// One person's whole record: every form and gift linked by their email
 export default async function PersonPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const record = await getPerson(id);
   if (!record) notFound();
-  const { person, volunteer, donor, donations, shifts, requests } = record;
+  const { person, volunteer, donor, donations, shifts, requests, bookings } = record;
   const given = donations.reduce((sum, d) => sum + Number(d.amount), 0);
   const worked = shifts.reduce((sum, s) => sum + Number(s.hours), 0);
   const roles = [volunteer && "Volunteer", (donor || donations.length > 0) && "Donor", requests.length > 0 && "Asked for help"].filter(Boolean);
@@ -75,6 +75,18 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
               <dl className="details-list">
                 <dt>Signed up</dt>
                 <dd>{shortDate(volunteer.created_at)}</dd>
+                <dt>Volunteering for</dt>
+                <dd>{labelFor(VOLUNTEER_PROGRAMS, volunteer.program) || "Not given"}</dd>
+                {bookings.length > 0 && (
+                  <>
+                    <dt>Weekend dates</dt>
+                    <dd>
+                      {bookings
+                        .map((b) => `${shortDate(b.day)}${b.group_name ? `: ${b.group_name}` : ""}${b.group_size ? ` (${b.group_size} people)` : ""}`)
+                        .join("; ")}
+                    </dd>
+                  </>
+                )}
                 <dt>Can help</dt>
                 <dd>{volunteer.availability.map((a) => labelFor(AVAILABILITY, a)).join("; ") || "Not given"}</dd>
                 <dt>Interests</dt>

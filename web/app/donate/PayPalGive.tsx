@@ -1,7 +1,7 @@
 "use client";
 
 // "Give online" box: pick an amount, then pay in PayPal's own window
-// (PayPal account, Venmo, or card). The gift is logged by the webhook (FR-4).
+// (PayPal account, Venmo, or card)
 
 import { useEffect, useRef, useState } from "react";
 

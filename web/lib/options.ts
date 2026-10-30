@@ -1,5 +1,4 @@
-// Choices shown on the forms. Change the labels here and every page updates.
-// The age groups, skills, and help categories are placeholders until the client confirms them.
+// Choices shown on the forms
 
 export type Option = { value: string; label: string };
 
@@ -11,6 +10,14 @@ export const AGE_GROUPS: Option[] = [
   "65 to 79",
   "80 or older",
 ].map((g) => ({ value: g, label: g }));
+
+// Where a volunteer wants to help
+// Each one is sent to a different person; form_recipients in 0004.
+export const VOLUNTEER_PROGRAMS: Option[] = [
+  { value: "step", label: "STEP" },
+  { value: "weekday", label: "Weekday Soup Kitchen" },
+  { value: "weekend_group", label: "Soup Kitchen Weekend Group" },
+];
 
 export const AVAILABILITY: Option[] = [
   { value: "weekday-morning", label: "Weekday mornings (Mon to Fri, 8 AM to 1 PM)" },

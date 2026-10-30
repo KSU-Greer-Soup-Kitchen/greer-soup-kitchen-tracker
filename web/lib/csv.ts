@@ -1,5 +1,4 @@
-// Builds a spreadsheet (CSV) file. Cells that start with = + - @ get a leading
-// apostrophe so a spreadsheet never runs them as a formula.
+// Builds a spreadsheet (CSV) file. Cells that start with = + - @ get a leading apostrophe
 
 function cell(value: string): string {
   const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;

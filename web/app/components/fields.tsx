@@ -1,7 +1,7 @@
 "use client";
 
-// Form building blocks. Every input has a visible label, and errors show
-// in red next to the field and in a list at the top of the form (NFR-1).
+// form; every input has a visible label, and errors show
+// in red next to the field and in a list at the top of the form
 
 import { useEffect, useRef } from "react";
 import type { Option } from "../../lib/options";
@@ -25,7 +25,7 @@ type Common = {
   optional?: boolean;
   errors: Record<string, string>;
   values: Values;
-  // Makes ids unique when the same form shows more than once on a page
+  // makes ids unique when the same form shows more than once on a page
   idSuffix?: string;
 };
 
@@ -99,7 +99,8 @@ export function SelectField({
   options,
   idSuffix,
   placeholder = "Choose one",
-}: Common & { options: Option[]; placeholder?: string }) {
+  onChange,
+}: Common & { options: Option[]; placeholder?: string; onChange?: (value: string) => void }) {
   const id = `f-${name}${idSuffix ?? ""}`;
   const error = errors[name];
   const described = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
@@ -111,7 +112,14 @@ export function SelectField({
           {hint}
         </span>
       )}
-      <select id={id} name={name} defaultValue={asText(values[name])} aria-describedby={described} aria-invalid={!!error}>
+      <select
+        id={id}
+        name={name}
+        defaultValue={asText(values[name])}
+        aria-describedby={described}
+        aria-invalid={!!error}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+      >
         <option value="">{placeholder}</option>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -176,8 +184,7 @@ export function ChoiceField({
   );
 }
 
-// The red box at the top listing every problem, each one a link to its field.
-// It takes focus so screen readers announce it right away.
+// the red box at the top listing every problem, each one a link to its field.
 export function ErrorSummary({ state, labels }: { state: FormState; labels?: Record<string, string> }) {
   const ref = useRef<HTMLDivElement>(null);
   const entries = Object.entries(state.errors);
@@ -205,7 +212,7 @@ export function ErrorSummary({ state, labels }: { state: FormState; labels?: Rec
   );
 }
 
-// Shown in place of the form once it is saved
+// shown in place of the form once it is saved
 export function SuccessPanel({ title, children }: { title: string; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -220,7 +227,7 @@ export function SuccessPanel({ title, children }: { title: string; children: Rea
   );
 }
 
-// Hidden from people. Spam robots fill in every box, so a filled-in one means a robot.
+// hidden from people
 export function RobotTrap() {
   return (
     <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>

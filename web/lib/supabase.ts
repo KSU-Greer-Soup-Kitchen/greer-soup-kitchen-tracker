@@ -20,7 +20,7 @@ export function db(): SupabaseClient {
   return client;
 }
 
-// Saves a PayPal donation and links it to the person with the same email (FR-5).
+// Saves a PayPal donation and links it to the person with the same email.
 // Returns false when this PayPal transaction was already saved.
 export async function savePayPalDonation(donation: DonationToSave): Promise<boolean> {
   const { data, error } = await db().rpc("record_paypal_donation", {
@@ -40,7 +40,13 @@ export async function savePayPalDonation(donation: DonationToSave): Promise<bool
   return data === true;
 }
 
-// The three public forms (FR-1, FR-2, FR-3). Each one links to the person by email (FR-5).
+// The three public forms. Each one links to the person by email.
+// A weekend group picked a date another group just booked
+export class DateTakenError extends Error {
+  constructor() {
+    super("That weekend date was just taken");
+  }
+}
 
 export async function saveVolunteer(v: VolunteerInput): Promise<void> {
   const { error } = await db().rpc("submit_volunteer", {
@@ -53,7 +59,12 @@ export async function saveVolunteer(v: VolunteerInput): Promise<void> {
     p_availability: v.availability,
     p_skills: v.skills,
     p_notes: v.notes,
+    p_program: v.program,
+    p_weekend_date: v.weekendDate || null,
+    p_group_name: v.groupName || null,
+    p_group_size: v.groupSize,
   });
+  if (error?.message.includes("date_taken")) throw new DateTakenError();
   if (error) throw new Error(`Could not save volunteer: ${error.message}`);
 }
 
@@ -87,4 +98,19 @@ export async function saveHelpRequest(h: HelpInput): Promise<void> {
     p_best_time: h.bestTime,
   });
   if (error) throw new Error(`Could not save help request: ${error.message}`);
+}
+
+// Weekend dates a volunteer group can still book, as YYYY-MM-DD, soonest first
+export async function listOpenWeekendDates(): Promise<string[]> {
+  const { data, error } = await db().rpc("list_open_weekend_dates");
+  if (error) throw new Error(`Could not load weekend dates: ${error.message}`);
+  return ((data as string[] | null) ?? []).map((d) => String(d).slice(0, 10));
+}
+
+// Who a form should be emailed to (see form_recipients in migration 0004), or null if nobody yet
+export async function findRecipient(route: string): Promise<string | null> {
+  const { data, error } = await db().from("form_recipients").select("email").eq("route", route).maybeSingle();
+  if (error) throw new Error(`Could not look up who gets this form: ${error.message}`);
+  const email = (data as { email: string | null } | null)?.email?.trim();
+  return email || null;
 }

@@ -1,4 +1,4 @@
-// Simple line icons. Decorative only, so screen readers skip them.
+// simple line icons
 
 const PATHS: Record<string, string> = {
   hands:

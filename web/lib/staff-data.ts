@@ -1,11 +1,11 @@
-// Everything the staff dashboard reads (FR-7, FR-8).
+// Everything the staff dashboard reads
 // Every function checks for a logged-in staff member first, so private data
-// can't be read from anywhere else by mistake (NFR-2).
+// can't be read from anywhere else by mistake
 
 import "server-only";
 import { requireStaff } from "./auth";
 import { db } from "./supabase";
-import { monthStart } from "./format";
+import { monthStart, today } from "./format";
 
 export type Person = {
   id: string;
@@ -36,6 +36,8 @@ export type Donation = {
 
 export type Volunteer = {
   person_id: string;
+  // step, weekday, or weekend_group
+  program: string | null;
   availability: string[];
   skills: string[];
   notes: string | null;
@@ -140,16 +142,26 @@ export async function listDonors(): Promise<DonorRow[]> {
     .filter((p) => p.donor || p.giftCount > 0);
 }
 
-export type VolunteerRow = Volunteer & { hoursThisMonth: number; hoursTotal: number; lastShift: string | null };
+// A weekend date a volunteer group booked
+export type WeekendBooking = { day: string; group_name: string | null; group_size: number | null; booked_person_id: string };
+
+export type VolunteerRow = Volunteer & {
+  hoursThisMonth: number;
+  hoursTotal: number;
+  lastShift: string | null;
+  bookings: WeekendBooking[];
+};
 
 export async function listVolunteers(): Promise<VolunteerRow[]> {
   await requireStaff();
   const thisMonth = monthStart();
-  const [vols, shifts] = await Promise.all([
+  const [vols, shifts, booked] = await Promise.all([
     db().from("volunteers").select("*, people(*)").order("created_at", { ascending: false }),
     db().from("volunteer_shifts").select("person_id, hours, shift_date"),
+    db().from("weekend_dates").select("day, group_name, group_size, booked_person_id").not("booked_person_id", "is", null).gte("day", today()).order("day"),
   ]);
   const allShifts = check(shifts) as Pick<Shift, "person_id" | "hours" | "shift_date">[];
+  const bookings = check(booked) as WeekendBooking[];
   return (check(vols) as Volunteer[])
     .map((v) => {
       const mine = allShifts.filter((s) => s.person_id === v.person_id);
@@ -158,6 +170,7 @@ export async function listVolunteers(): Promise<VolunteerRow[]> {
         hoursThisMonth: mine.filter((s) => s.shift_date >= thisMonth).reduce((sum, s) => sum + Number(s.hours), 0),
         hoursTotal: mine.reduce((sum, s) => sum + Number(s.hours), 0),
         lastShift: mine.map((s) => s.shift_date).sort().at(-1) ?? null,
+        bookings: bookings.filter((b) => b.booked_person_id === v.person_id),
       };
     })
     .sort((a, b) => Number(b.active) - Number(a.active) || fullName(a.people).localeCompare(fullName(b.people)));
@@ -187,12 +200,13 @@ export async function getPerson(id: string) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const person = check(await db().from("people").select("*").eq("id", id).maybeSingle()) as Person | null;
   if (!person) return null;
-  const [volunteer, donor, donations, shifts, requests] = await Promise.all([
+  const [volunteer, donor, donations, shifts, requests, booked] = await Promise.all([
     db().from("volunteers").select("*").eq("person_id", id).maybeSingle(),
     db().from("donors").select("*").eq("person_id", id).maybeSingle(),
     db().from("donations").select("*").eq("person_id", id).order("donated_at", { ascending: false }),
     db().from("volunteer_shifts").select("*").eq("person_id", id).order("shift_date", { ascending: false }),
     db().from("assistance_requests").select("*").eq("person_id", id).order("created_at", { ascending: false }),
+    db().from("weekend_dates").select("day, group_name, group_size, booked_person_id").eq("booked_person_id", id).order("day", { ascending: false }),
   ]);
   return {
     person,
@@ -201,10 +215,11 @@ export async function getPerson(id: string) {
     donations: check(donations) as Donation[],
     shifts: check(shifts) as Shift[],
     requests: check(requests) as HelpRequest[],
+    bookings: check(booked) as WeekendBooking[],
   };
 }
 
-// Numbers for the reports page (FR-8): the last 12 months
+// Numbers for the reports page: the last 12 months
 export async function getReportData() {
   await requireStaff();
   const since = monthStart(11);
@@ -221,7 +236,7 @@ export async function getReportData() {
   };
 }
 
-// Email addresses of active volunteers, for volunteer notices (FR-9)
+// Email addresses of active volunteers, for volunteer notices
 export async function listVolunteerContacts() {
   await requireStaff();
   type Row = Pick<Volunteer, "availability" | "skills"> & { people: Pick<Person, "id" | "first_name" | "last_name" | "email"> | null };

@@ -1,5 +1,4 @@
-// Simple bar charts for the reports page. Every chart also has a plain table
-// underneath, so the numbers can be read without the picture.
+// simple bar charts for the reports page
 
 export type Point = { label: string; long?: string; value: number };
 

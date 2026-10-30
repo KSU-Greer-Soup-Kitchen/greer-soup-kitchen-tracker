@@ -14,7 +14,7 @@ function form(fields: Record<string, string | string[]>): FormData {
 describe("volunteer form", () => {
   it("accepts a complete sign-up and drops unknown choices", () => {
     const { input, errors } = readVolunteerForm(
-      form({ first_name: " Ann ", last_name: "Lee", email: "Ann@Example.com", phone: "864-555-0101", availability: ["weekday-morning", "hacker"] }),
+      form({ program: "weekday", first_name: " Ann ", last_name: "Lee", email: "Ann@Example.com", phone: "864-555-0101", availability: ["weekday-morning", "hacker"] }),
     );
     expect(errors).toEqual({});
     expect(input.firstName).toBe("Ann");
@@ -24,7 +24,7 @@ describe("volunteer form", () => {
 
   it("lists every missing answer in plain words", () => {
     const { errors } = readVolunteerForm(form({ email: "not-an-email" }));
-    expect(Object.keys(errors).sort()).toEqual(["availability", "email", "first_name", "last_name", "phone"]);
+    expect(Object.keys(errors).sort()).toEqual(["availability", "email", "first_name", "last_name", "phone", "program"]);
     expect(errors.email).toMatch(/name@example.com/);
   });
 });

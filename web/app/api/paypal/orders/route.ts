@@ -1,6 +1,6 @@
 // Starts a PayPal donation for the amount the donor picked.
 
-import { createDonationOrder, readDonationAmount, readPayPalConfig } from "../../../../lib/paypal";
+import { createDonationOrder, readDonationAmount, readPayPalCheckoutConfig } from "../../../../lib/paypal";
 
 export const runtime = "nodejs";
 
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Choose an amount from $1 to $10,000" }, { status: 400 });
   }
   try {
-    const id = await createDonationOrder(amount, readPayPalConfig());
+    const id = await createDonationOrder(amount, readPayPalCheckoutConfig());
     return Response.json({ id });
   } catch (err) {
     console.error("PayPal order:", err instanceof Error ? err.message : err);

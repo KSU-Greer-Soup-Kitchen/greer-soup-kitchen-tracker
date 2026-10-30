@@ -1,7 +1,8 @@
 // Checks what people typed into the public forms and turns it into clean values.
-// Every error message says exactly what to do, in plain words (NFR-1).
+// Every error message says exactly what to do in plain words
 
-import { AGE_GROUPS, AVAILABILITY, BEST_TIMES, CONTACT_PREFS, GIVING_FREQUENCY, HEARD_FROM, NEEDS, SKILLS, type Option } from "./options";
+import { today } from "./format";
+import { AGE_GROUPS, AVAILABILITY, BEST_TIMES, CONTACT_PREFS, GIVING_FREQUENCY, HEARD_FROM, NEEDS, SKILLS, VOLUNTEER_PROGRAMS, type Option } from "./options";
 
 export type FieldErrors = Record<string, string>;
 
@@ -39,6 +40,11 @@ function phoneLooksReal(phone: string): boolean {
 }
 
 export type VolunteerInput = {
+  program: string;
+  // Weekend groups only (empty / null otherwise)
+  weekendDate: string;
+  groupName: string;
+  groupSize: number | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -50,8 +56,15 @@ export type VolunteerInput = {
   notes: string;
 };
 
-export function readVolunteerForm(form: FormData): { input: VolunteerInput; errors: FieldErrors } {
+export function readVolunteerForm(form: FormData, now = new Date()): { input: VolunteerInput; errors: FieldErrors } {
+  const program = pickOne(form, "program", VOLUNTEER_PROGRAMS);
+  const isGroup = program === "weekend_group";
+  const sizeText = text(form, "group_size", 4);
   const input: VolunteerInput = {
+    program,
+    weekendDate: isGroup ? text(form, "weekend_date", 10) : "",
+    groupName: isGroup ? text(form, "group_name", 120) : "",
+    groupSize: isGroup && sizeText ? Number(sizeText) : null,
     firstName: text(form, "first_name", 100),
     lastName: text(form, "last_name", 100),
     email: text(form, "email", 200).toLowerCase(),
@@ -63,13 +76,26 @@ export function readVolunteerForm(form: FormData): { input: VolunteerInput; erro
     notes: text(form, "notes", 2000),
   };
   const errors: FieldErrors = {};
+  if (!input.program) errors.program = "Choose where you would like to volunteer";
   if (!input.firstName) errors.first_name = "Enter your first name";
   if (!input.lastName) errors.last_name = "Enter your last name";
   if (!input.email) errors.email = "Enter your email address";
   else if (!EMAIL.test(input.email)) errors.email = "Check your email address. It should look like name@example.com";
   if (!input.phone) errors.phone = "Enter your phone number";
   else if (!phoneLooksReal(input.phone)) errors.phone = "Check your phone number. It should have at least 7 digits";
-  if (input.availability.length === 0) errors.availability = "Pick at least one time you can help";
+  if (isGroup) {
+    // Weekend groups pick a date instead of regular times
+    input.availability = [];
+    if (!input.groupName) errors.group_name = "Enter your group's name";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(input.weekendDate) || input.weekendDate <= today(now)) {
+      errors.weekend_date = "Choose one of the weekend dates listed";
+    }
+    if (input.groupSize !== null && !(Number.isInteger(input.groupSize) && input.groupSize >= 1 && input.groupSize <= 200)) {
+      errors.group_size = "Enter how many people are coming, from 1 to 200";
+    }
+  } else if (input.availability.length === 0) {
+    errors.availability = "Pick at least one time you can help";
+  }
   return { input, errors };
 }
 

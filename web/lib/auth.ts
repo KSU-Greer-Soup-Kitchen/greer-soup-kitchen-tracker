@@ -1,6 +1,4 @@
-// Staff login (FR-6). Staff accounts are made in Supabase (Authentication -> Users -> Add user).
-// Public sign-up is turned off there, so only people staff add can log in.
-// The login is kept in two cookies the browser can't read with scripts.
+// Staff login. Staff accounts are made in Supabase (Authentication -> Users -> Add user)
 
 import "server-only";
 import { cookies } from "next/headers";
@@ -38,8 +36,7 @@ export async function signOut(): Promise<void> {
   jar.delete(REFRESH_COOKIE);
 }
 
-// Returns the logged-in staff member, or null. Asks Supabase every time,
-// so a deleted account or a faked cookie never gets in.
+// Returns the logged-in staff member, or null
 export async function getStaff(): Promise<Staff | null> {
   const token = (await cookies()).get(ACCESS_COOKIE)?.value;
   if (!token) {
@@ -52,7 +49,7 @@ export async function getStaff(): Promise<Staff | null> {
   return { id: data.user.id, email: data.user.email ?? "" };
 }
 
-// Call this at the top of every staff page and staff action (NFR-2).
+// Call this at the top of every staff page and staff action
 export async function requireStaff(): Promise<Staff> {
   const staff = await getStaff();
   if (!staff) {
