@@ -15,7 +15,7 @@ export function SiteHeader({ current }: { current: string }) {
       <div className="header-inner">
         <Link className="brand" href="/">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="Daily Bread Ministries, Greer Soup Kitchen. Go to home page" width={170} height={90} />
+          <img src="/logo.png" alt="Daily Bread Ministries, Greer Soup Kitchen. Go to home page" width={170} height={90} />
         </Link>
         <nav className="main-nav" aria-label="Main">
           <ul>

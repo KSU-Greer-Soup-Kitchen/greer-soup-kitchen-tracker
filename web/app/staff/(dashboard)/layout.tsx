@@ -16,7 +16,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
       <aside className="staff-side">
         <Link className="staff-brand" href="/staff">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="Staff dashboard home" width={250} height={132} />
+          <img src="/logo.png" alt="Staff dashboard home" width={250} height={132} />
         </Link>
         <StaffNav />
         <div className="staff-user">

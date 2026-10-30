@@ -311,6 +311,15 @@ main {
 .info-block p {
   margin-bottom: 0.4rem;
 }
+.info-block p strong {
+  display: block;
+}
+.info-block a[href^="tel:"] {
+  white-space: nowrap;
+}
+.info-block {
+  overflow-wrap: anywhere;
+}
 
 /* ---------- Buttons ---------- */
 
@@ -473,6 +482,7 @@ fieldset {
   display: grid;
   gap: 0.5rem;
 }
+.field .choice,
 .choice {
   display: flex;
   align-items: center;
