@@ -56,6 +56,7 @@ body {
 img,
 svg {
   max-width: 100%;
+  height: auto;
 }
 
 a {
@@ -1122,6 +1123,7 @@ details.drawer > .drawer-body {
 .login-card .brand-img {
   display: block;
   width: 220px;
+  height: auto;
   margin: 0 auto 1.5rem;
 }
 
