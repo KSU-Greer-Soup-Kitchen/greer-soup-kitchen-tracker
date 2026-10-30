@@ -141,3 +141,55 @@ export async function getOrderDetails(orderId: string, config: PayPalConfig): Pr
     paymentMethod: paymentMethodFromSource(order.payment_source),
   };
 }
+
+// For the "Give with PayPal" button on the donate page. The donor approves the
+// order in the PayPal window, then we capture it. The webhook saves the gift.
+export async function createDonationOrder(amount: number, config: PayPalConfig): Promise<string> {
+  const token = await getAccessToken(config);
+  const res = await fetch(`${config.baseUrl}/v2/checkout/orders`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          description: "Donation to Daily Bread Ministries (Greer Soup Kitchen and Greer STEP)",
+          amount: { currency_code: "USD", value: amount.toFixed(2) },
+        },
+      ],
+      payment_source: {
+        paypal: {
+          experience_context: {
+            brand_name: "Daily Bread Ministries",
+            shipping_preference: "NO_SHIPPING",
+            user_action: "PAY_NOW",
+          },
+        },
+      },
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`PayPal order create failed (${res.status})`);
+  }
+  const order = (await res.json()) as { id: string };
+  return order.id;
+}
+
+export async function captureDonationOrder(orderId: string, config: PayPalConfig): Promise<string> {
+  const token = await getAccessToken(config);
+  const res = await fetch(`${config.baseUrl}/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+  });
+  const data = (await res.json().catch(() => ({}))) as { status?: string; details?: { issue?: string }[] };
+  if (!res.ok) {
+    throw new Error(`PayPal capture failed (${res.status} ${data.details?.[0]?.issue ?? ""})`);
+  }
+  return data.status ?? "UNKNOWN";
+}
+
+// Donations the button accepts, in dollars
+export function readDonationAmount(value: unknown): number | null {
+  const amount = Math.round(Number(value) * 100) / 100;
+  return Number.isFinite(amount) && amount >= 1 && amount <= 10000 ? amount : null;
+}
