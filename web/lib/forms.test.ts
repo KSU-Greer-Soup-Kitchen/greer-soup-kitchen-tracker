@@ -30,7 +30,7 @@ describe("volunteer form", () => {
 });
 
 describe("donor form", () => {
-  const base = { first_name: "Bo", last_name: "Ray", email: "bo@example.com", city: "Greer", age_group: "65 to 79", giving_frequency: "one-time" };
+  const base = { first_name: "Bo", last_name: "Ray", email: "bo@example.com", address: "100 Main St.", city: "Greer", age_group: "65 to 79", giving_frequency: "one-time" };
 
   it("needs a name for an honor or memory gift", () => {
     expect(readDonorForm(form({ ...base, tribute: "memory" })).errors.tribute_name).toBeDefined();

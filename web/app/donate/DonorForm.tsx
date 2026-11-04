@@ -42,12 +42,10 @@ export function DonorForm({ giveOnline }: { giveOnline: React.ReactNode }) {
       <TextField name="email" label="Email address" type="email" autoComplete="email" hint="Use the same email you give PayPal so we can match your gifts." {...f} />
       <TextField name="phone" label="Phone number" type="tel" autoComplete="tel" optional {...f} />
       <TextField
-        name="address"
-        label="Mailing address"
-        autoComplete="street-address"
-        hint="Needed if you want thank-you letters or the newsletter by mail."
-        optional
-        {...f}
+          name="address"
+          label="Mailing address"
+          autoComplete="street-address"
+          {...f}
       />
       <TextField name="city" label="Town or city you live in" autoComplete="address-level2" {...f} />
       <SelectField name="age_group" label="Age group" options={AGE_GROUPS} {...f} />

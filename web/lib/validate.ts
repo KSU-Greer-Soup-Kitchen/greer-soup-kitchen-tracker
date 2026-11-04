@@ -139,6 +139,7 @@ export function readDonorForm(form: FormData): { input: DonorInput; errors: Fiel
   else if (!EMAIL.test(input.email)) errors.email = "Check your email address. It should look like name@example.com";
   if (input.phone && !phoneLooksReal(input.phone)) errors.phone = "Check your phone number. It should have at least 7 digits";
   if (!input.city) errors.city = "Enter the town or city you live in";
+  if (!input.address) errors.address = "Enter your mailing address";
   if (!input.ageGroup) errors.age_group = "Choose your age group";
   if (!input.givingFrequency) errors.giving_frequency = "Choose one time or regular giving";
   if (input.tributeType && !input.tributeName) errors.tribute_name = "Enter the name of the person your gift honors";
