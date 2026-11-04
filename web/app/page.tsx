@@ -100,9 +100,6 @@ export default function HomePage() {
               <p>
                 STEP: <a href="tel:+18643345265">864-334-5265</a>
               </p>
-              <p>
-                <a href="mailto:mlbennett1116@gmail.com">mlbennett1116@gmail.com</a>
-              </p>
             </div>
             <div className="info-block">
               <h3>Find us</h3>
