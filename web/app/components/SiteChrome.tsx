@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/volunteer", label: "Volunteer" },
   { href: "/donate", label: "Donate" },
   { href: "/get-help", label: "Get Help" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function SiteHeader({ current }: { current: string }) {

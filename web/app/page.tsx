@@ -67,6 +67,9 @@ export default function HomePage() {
               <p>
                 Shelter to Empower People. Homeless families get a place to live and support with jobs, savings, and finding a home of their own.
               </p>
+              <p>
+                <Link href="/step-application">Apply for the STEP family shelter</Link>
+              </p>
             </div>
           </div>
         </section>
@@ -93,12 +96,15 @@ export default function HomePage() {
               </p>
             </div>
             <div className="info-block">
-              <h3>Call or email</h3>
+              <h3>Call or write to us</h3>
               <p>
                 Soup Kitchen: <a href="tel:+18649680323">864-968-0323</a>
               </p>
               <p>
                 STEP: <a href="tel:+18643345265">864-334-5265</a>
+              </p>
+              <p>
+                <Link href="/contact">Send us a message</Link>
               </p>
             </div>
             <div className="info-block">

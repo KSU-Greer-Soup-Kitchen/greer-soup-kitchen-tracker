@@ -1,11 +1,11 @@
 "use client";
 
-// Staff forms: record a gift, log hours, update a help request, edit contact details.
+// Staff forms: record a gift, log hours, update a request / application / message, edit contact details.
 
 import { useActionState, useEffect, useState } from "react";
 import { AGE_GROUPS, MANUAL_PAYMENT_METHODS, REQUEST_STATUS, type Option } from "../../../lib/options";
 import { initialFormState, type FormState } from "../../../lib/validate";
-import { addGift, logHours, updatePerson, updateRequest } from "../actions";
+import { addGift, logHours, updateMessage, updatePerson, updateRequest, updateStepApplication } from "../actions";
 import { ErrorSummary, SelectField, SubmitButton, TextField } from "../../components/fields";
 
 type PersonChoice = { id: string; label: string };
@@ -117,8 +117,11 @@ export function LogHoursForm({ volunteers, today }: { volunteers: PersonChoice[]
   );
 }
 
-export function RequestForm({ id, status, notes }: { id: string; status: string; notes: string | null }) {
-  const [state, action, pending] = useActionState(updateRequest, initialFormState);
+const STATUS_ACTIONS = { help: updateRequest, step: updateStepApplication, message: updateMessage };
+
+// Status + staff notes for a help request (default), STEP application, or message
+export function RequestForm({ id, status, notes, kind = "help" }: { id: string; status: string; notes: string | null; kind?: keyof typeof STATUS_ACTIONS }) {
+  const [state, action, pending] = useActionState(STATUS_ACTIONS[kind], initialFormState);
   const values = state.status === "error" ? state.values : { status, staff_notes: notes ?? "" };
   return (
     <form action={action} noValidate key={state.attempt}>
@@ -191,5 +194,13 @@ export function ConfirmButton({
         {children}
       </button>
     </form>
+  );
+}
+
+export function PrintButton() {
+  return (
+    <button type="button" className="button button-secondary" onClick={() => window.print()}>
+      Print
+    </button>
   );
 }

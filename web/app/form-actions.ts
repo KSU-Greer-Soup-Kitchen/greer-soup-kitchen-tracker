@@ -4,9 +4,10 @@
 // Nothing is sent back to the browser except "saved" or the list of mistakes.
 // After saving, the form is emailed to whoever handles it (see lib/notify.ts)
 
-import { donorEmail, helpEmail, sendFormEmail, volunteerEmail, type Email } from "../lib/notify";
-import { DateTakenError, findRecipient, saveDonor, saveHelpRequest, saveVolunteer } from "../lib/supabase";
-import { formValues, readDonorForm, readHelpForm, readVolunteerForm, type FieldErrors, type FormState } from "../lib/validate";
+import { contactEmail, donorEmail, helpEmail, sendFormEmail, stepEmail, volunteerEmail, type Email } from "../lib/notify";
+import { readStepForm } from "../lib/step";
+import { DateTakenError, findRecipient, saveContactMessage, saveDonor, saveHelpRequest, saveStepApplication, saveVolunteer } from "../lib/supabase";
+import { formValues, readContactForm, readDonorForm, readHelpForm, readVolunteerForm, type FieldErrors, type FormState } from "../lib/validate";
 
 const SAVE_FAILED: FieldErrors = {
   form: "Sorry, something went wrong and your form was not sent. Please try again, or call us at 864-968-0323.",
@@ -56,4 +57,12 @@ export async function submitDonorForm(prev: FormState, form: FormData): Promise<
 
 export async function submitHelpForm(prev: FormState, form: FormData): Promise<FormState> {
   return handle(prev, form, readHelpForm, saveHelpRequest, helpEmail);
+}
+
+export async function submitContactForm(prev: FormState, form: FormData): Promise<FormState> {
+  return handle(prev, form, readContactForm, saveContactMessage, contactEmail);
+}
+
+export async function submitStepApplication(prev: FormState, form: FormData): Promise<FormState> {
+  return handle(prev, form, (f) => readStepForm(f), saveStepApplication, stepEmail);
 }

@@ -4,7 +4,9 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { DonationToSave } from "./donations";
-import type { DonorInput, HelpInput, VolunteerInput } from "./validate";
+import { lock } from "./lockbox";
+import type { StepInput } from "./step";
+import type { ContactInput, DonorInput, HelpInput, VolunteerInput } from "./validate";
 
 let client: SupabaseClient | null = null;
 
@@ -98,6 +100,28 @@ export async function saveHelpRequest(h: HelpInput): Promise<void> {
     p_best_time: h.bestTime,
   });
   if (error) throw new Error(`Could not save help request: ${error.message}`);
+}
+
+export async function saveContactMessage(c: ContactInput): Promise<void> {
+  const { error } = await db()
+    .from("contact_messages")
+    .insert({ name: c.name, email: c.email || null, phone: c.phone || null, topic: c.topic, message: c.message });
+  if (error) throw new Error(`Could not save message: ${error.message}`);
+}
+
+// The answers are locked before saving (see lib/lockbox.ts). Only the name,
+// phone, email, and family size stay readable for the staff list.
+export async function saveStepApplication(s: StepInput): Promise<void> {
+  const answers = lock({ adultCount: s.adultCount, childCount: s.childCount, answers: s.answers, signedOn: s.signedOn });
+  const { error } = await db().from("step_applications").insert({
+    applicant_name: s.applicantName,
+    phone: s.phone || null,
+    email: s.email || null,
+    adult_count: s.adultCount,
+    child_count: s.childCount,
+    answers,
+  });
+  if (error) throw new Error(`Could not save STEP application: ${error.message}`);
 }
 
 // Weekend dates a volunteer group can still book, as YYYY-MM-DD, soonest first

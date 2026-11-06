@@ -4,6 +4,7 @@
 
 import "server-only";
 import { requireStaff } from "./auth";
+import { unlock } from "./lockbox";
 import { db } from "./supabase";
 import { monthStart, today } from "./format";
 
@@ -78,6 +79,33 @@ export type HelpRequest = {
   people?: Pick<Person, "id" | "first_name" | "last_name" | "email" | "phone"> | null;
 };
 
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  topic: string;
+  message: string;
+  status: "new" | "contacted" | "closed";
+  staff_notes: string | null;
+  created_at: string;
+};
+
+export type StepApplicationRow = {
+  id: string;
+  applicant_name: string;
+  phone: string | null;
+  email: string | null;
+  adult_count: number;
+  child_count: number;
+  status: "new" | "contacted" | "closed";
+  staff_notes: string | null;
+  created_at: string;
+};
+
+// What was locked when the application was saved (see saveStepApplication)
+export type StepAnswers = { adultCount: number; childCount: number; answers: Record<string, string>; signedOn: string };
+
 function check<T>(result: { data: T | null; error: { message: string } | null }): T {
   if (result.error) throw new Error(result.error.message);
   return result.data as T;
@@ -88,7 +116,7 @@ const PERSON_SHORT = "people(id, first_name, last_name, email)";
 export async function getOverview() {
   await requireStaff();
   const thisMonth = monthStart();
-  const [volunteers, shifts, donations, requests, recent] = await Promise.all([
+  const [volunteers, shifts, donations, requests, recent, newApplications, newMessages] = await Promise.all([
     db().from("volunteers").select("person_id", { count: "exact", head: true }).eq("active", true),
     db().from("volunteer_shifts").select("hours").gte("shift_date", thisMonth),
     db().from("donations").select("amount").gte("donated_at", thisMonth),
@@ -98,8 +126,12 @@ export async function getOverview() {
       .eq("status", "new")
       .order("created_at", { ascending: false }),
     db().from("donations").select(`*, ${PERSON_SHORT}`).order("donated_at", { ascending: false }).limit(6),
+    db().from("step_applications").select("id", { count: "exact", head: true }).eq("status", "new"),
+    db().from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
   ]);
-  if (volunteers.error) throw new Error(volunteers.error.message);
+  for (const counted of [volunteers, newApplications, newMessages]) {
+    if (counted.error) throw new Error(counted.error.message);
+  }
   const hours = check(shifts) as { hours: number }[];
   const gifts = check(donations) as { amount: number }[];
   return {
@@ -109,6 +141,8 @@ export async function getOverview() {
     giftsThisMonth: gifts.length,
     newRequests: check(requests) as HelpRequest[],
     recentDonations: check(recent) as Donation[],
+    newApplications: newApplications.count ?? 0,
+    newMessages: newMessages.count ?? 0,
   };
 }
 
@@ -193,6 +227,40 @@ export async function listRequests(status?: string): Promise<HelpRequest[]> {
   let query = db().from("assistance_requests").select("*, people(id, first_name, last_name, email, phone)").order("created_at", { ascending: false });
   if (status) query = query.eq("status", status);
   return check(await query) as HelpRequest[];
+}
+
+export async function listMessages(status?: string): Promise<ContactMessage[]> {
+  await requireStaff();
+  let query = db().from("contact_messages").select("*").order("created_at", { ascending: false });
+  if (status) query = query.eq("status", status);
+  return check(await query) as ContactMessage[];
+}
+
+// The list never loads the locked answers
+export async function listStepApplications(status?: string): Promise<StepApplicationRow[]> {
+  await requireStaff();
+  let query = db()
+    .from("step_applications")
+    .select("id, applicant_name, phone, email, adult_count, child_count, status, staff_notes, created_at")
+    .order("created_at", { ascending: false });
+  if (status) query = query.eq("status", status);
+  return check(await query) as StepApplicationRow[];
+}
+
+// One application with its answers unlocked. `answers` is null if they can't be
+// unlocked (for example, the STEP_APPLICATION_KEY setting was changed).
+export async function getStepApplication(id: string): Promise<{ row: StepApplicationRow; answers: StepAnswers | null } | null> {
+  await requireStaff();
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const data = check(await db().from("step_applications").select("*").eq("id", id).maybeSingle()) as (StepApplicationRow & { answers: string }) | null;
+  if (!data) return null;
+  const { answers: locked, ...row } = data;
+  try {
+    return { row, answers: unlock<StepAnswers>(locked) };
+  } catch (err) {
+    console.error("Could not unlock STEP application:", err instanceof Error ? err.message : err);
+    return { row, answers: null };
+  }
 }
 
 export async function getPerson(id: string) {

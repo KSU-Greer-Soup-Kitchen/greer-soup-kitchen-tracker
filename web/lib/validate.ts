@@ -2,7 +2,7 @@
 // Every error message says exactly what to do in plain words
 
 import { today } from "./format";
-import { AGE_GROUPS, AVAILABILITY, BEST_TIMES, CONTACT_PREFS, GIVING_FREQUENCY, HEARD_FROM, NEEDS, SKILLS, VOLUNTEER_PROGRAMS, type Option } from "./options";
+import { AGE_GROUPS, AVAILABILITY, BEST_TIMES, CONTACT_PREFS, CONTACT_TOPICS, GIVING_FREQUENCY, HEARD_FROM, NEEDS, SKILLS, VOLUNTEER_PROGRAMS, type Option } from "./options";
 
 export type FieldErrors = Record<string, string>;
 
@@ -174,6 +174,32 @@ export function readHelpForm(form: FormData): { input: HelpInput; errors: FieldE
   else if (input.email && !EMAIL.test(input.email)) errors.email = "Check your email address. It should look like name@example.com";
   else if (input.phone && !phoneLooksReal(input.phone)) errors.phone = "Check your phone number. It should have at least 7 digits";
   if (!input.need) errors.need = "Choose what you need help with";
+  return { input, errors };
+}
+
+export type ContactInput = {
+  name: string;
+  email: string;
+  phone: string;
+  topic: string;
+  message: string;
+};
+
+export function readContactForm(form: FormData): { input: ContactInput; errors: FieldErrors } {
+  const input: ContactInput = {
+    name: text(form, "name", 200),
+    email: text(form, "email", 200).toLowerCase(),
+    phone: text(form, "phone", 40),
+    topic: pickOne(form, "topic", CONTACT_TOPICS),
+    message: text(form, "message", 3000),
+  };
+  const errors: FieldErrors = {};
+  if (!input.name) errors.name = "Enter your name";
+  if (!input.email && !input.phone) errors.email = "Give us an email address or a phone number so we can answer you";
+  else if (input.email && !EMAIL.test(input.email)) errors.email = "Check your email address. It should look like name@example.com";
+  else if (input.phone && !phoneLooksReal(input.phone)) errors.phone = "Check your phone number. It should have at least 7 digits";
+  if (!input.topic) errors.topic = "Choose who your message is for";
+  if (!input.message) errors.message = "Type your message";
   return { input, errors };
 }
 

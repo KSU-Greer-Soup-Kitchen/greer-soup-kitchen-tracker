@@ -13,6 +13,23 @@ export default async function OverviewPage() {
     <>
       <PageHead title="Welcome back" intro={`Here is what is happening at the Soup Kitchen and STEP in ${monthName}.`} />
 
+      {(o.newApplications > 0 || o.newMessages > 0) && (
+        <p className="alert alert-warn" role="status">
+          Waiting for you:{" "}
+          {o.newApplications > 0 && (
+            <Link href="/staff/step">
+              {o.newApplications} new STEP {o.newApplications === 1 ? "application" : "applications"}
+            </Link>
+          )}
+          {o.newApplications > 0 && o.newMessages > 0 && " and "}
+          {o.newMessages > 0 && (
+            <Link href="/staff/messages">
+              {o.newMessages} new {o.newMessages === 1 ? "message" : "messages"}
+            </Link>
+          )}
+        </p>
+      )}
+
       <section className="stat-row" aria-label="This month at a glance">
         <Link className={`stat${o.newRequests.length ? " stat-attention" : ""}`} href="/staff/help">
           <span className="stat-number">{o.newRequests.length}</span>

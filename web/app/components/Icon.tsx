@@ -13,6 +13,7 @@ const PATHS: Record<string, string> = {
   help: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.3 9a2.8 2.8 0 0 1 5.4 1c0 1.8-2.7 2.5-2.7 4M12 17.5h.01",
   chart: "M4 20V10M10 20V4M16 20v-7M22 20H2",
   mail: "M3 5h18v14H3zM3 6l9 7 9-7",
+  inbox: "M4 4h16l1 9v7H3v-7zM3 13h5l1.5 3h5L16 13h5",
   logout: "M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l-4-4 4-4M6 12h11",
   phone:
     "M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z",

@@ -184,7 +184,8 @@ export async function setVolunteerActive(form: FormData): Promise<void> {
 
 // ---------- Help requests ----------
 
-export async function updateRequest(prev: FormState, form: FormData): Promise<FormState> {
+// Status + staff notes, shared by help requests, STEP applications, and messages
+async function saveStatus(table: "assistance_requests" | "step_applications" | "contact_messages", prev: FormState, form: FormData): Promise<FormState> {
   await requireStaff();
   const id = text(form, "id");
   const status = text(form, "status");
@@ -192,14 +193,37 @@ export async function updateRequest(prev: FormState, form: FormData): Promise<Fo
     return failed(form, prev, { status: "Choose a status" });
   }
   const { error } = await db()
-    .from("assistance_requests")
+    .from(table)
     .update({ status, staff_notes: text(form, "staff_notes", 2000) || null, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) {
-    console.error("Update request:", error.message);
+    console.error(`Update ${table}:`, error.message);
     return failed(form, prev, SAVE_FAILED);
   }
   return done(prev);
+}
+
+export async function updateRequest(prev: FormState, form: FormData): Promise<FormState> {
+  return saveStatus("assistance_requests", prev, form);
+}
+
+export async function updateStepApplication(prev: FormState, form: FormData): Promise<FormState> {
+  return saveStatus("step_applications", prev, form);
+}
+
+export async function updateMessage(prev: FormState, form: FormData): Promise<FormState> {
+  return saveStatus("contact_messages", prev, form);
+}
+
+// Applications hold very private details, so staff can remove one once it is no longer needed
+export async function deleteStepApplication(form: FormData): Promise<void> {
+  await requireStaff();
+  const id = text(form, "id");
+  if (!UUID.test(id)) return;
+  const { error } = await db().from("step_applications").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/staff", "layout");
+  redirect("/staff/step");
 }
 
 // ---------- People ----------

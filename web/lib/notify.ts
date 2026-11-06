@@ -1,8 +1,10 @@
 // Emails each new form to the person in charge of it
-import { labelFor, NEEDS, VOLUNTEER_PROGRAMS, AVAILABILITY, SKILLS, GIVING_FREQUENCY } from "./options";
-import type { DonorInput, HelpInput, VolunteerInput } from "./validate";
+import { labelFor, NEEDS, VOLUNTEER_PROGRAMS, AVAILABILITY, SKILLS, GIVING_FREQUENCY, CONTACT_TOPICS } from "./options";
+import type { StepInput } from "./step";
+import type { ContactInput, DonorInput, HelpInput, VolunteerInput } from "./validate";
 
-export type Email = { route: string; subject: string; text: string };
+// replyTo: when the person answering hits Reply, it goes to whoever sent the form
+export type Email = { route: string; subject: string; text: string; replyTo?: string };
 
 function lines(rows: [string, string | number | null | undefined][]): string {
   return rows
@@ -67,6 +69,39 @@ export function donorEmail(d: DonorInput): Email {
   };
 }
 
+export function contactEmail(c: ContactInput): Email {
+  return {
+    route: `contact_${c.topic}`,
+    subject: `Website message from ${c.name}`,
+    replyTo: c.email || undefined,
+    text:
+      lines([
+        ["From", c.name],
+        ["About", labelFor(CONTACT_TOPICS, c.topic)],
+        ["Email", c.email],
+        ["Phone", c.phone],
+      ]) +
+      `\n\n${c.message}` +
+      FOOTER,
+  };
+}
+
+// No answers from the application go in the email: they are private and email is not.
+export function stepEmail(s: StepInput): Email {
+  const people = `${s.adultCount} ${s.adultCount === 1 ? "adult" : "adults"}, ${s.childCount} ${s.childCount === 1 ? "child" : "children"}`;
+  return {
+    route: "step_application",
+    subject: "New STEP family shelter application",
+    text:
+      lines([
+        ["Name", s.applicantName],
+        ["Phone", s.phone],
+        ["Email", s.email],
+        ["Family", people],
+      ]) + "\n\nFor privacy, the answers are not in this email. Log in to the staff pages and open STEP applications to read it.",
+  };
+}
+
 export type SendResult = "sent" | "skipped" | "failed";
 
 // `findRecipient` is passed in so this can be tested without a database
@@ -88,6 +123,7 @@ export async function sendFormEmail(
         to: [to],
         subject: email.subject,
         text: email.text,
+        ...(email.replyTo ? { reply_to: email.replyTo } : {}),
       }),
     });
     if (!res.ok) {

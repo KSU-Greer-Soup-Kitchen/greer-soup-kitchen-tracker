@@ -50,7 +50,7 @@ export function TextField({
   multiline,
   inputMode,
 }: Common & {
-  type?: "text" | "email" | "tel" | "password";
+  type?: "text" | "email" | "tel" | "password" | "date";
   autoComplete?: string;
   multiline?: boolean;
   inputMode?: "text" | "email" | "tel" | "numeric" | "decimal";

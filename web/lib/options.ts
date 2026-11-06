@@ -66,6 +66,18 @@ export const NEEDS: Option[] = [
   { value: "other", label: "Something else" },
 ];
 
+// What a contact form message is about. Each one goes to a different person (form_recipients in 0005).
+export const CONTACT_TOPICS: Option[] = [
+  { value: "kitchen", label: "Greer Soup Kitchen" },
+  { value: "step", label: "Greer STEP" },
+  { value: "other", label: "Something else" },
+];
+
+export const YES_NO: Option[] = [
+  { value: "yes", label: "Yes" },
+  { value: "no", label: "No" },
+];
+
 export const BEST_TIMES: Option[] = ["Morning", "Afternoon", "Evening"].map((t) => ({ value: t, label: t }));
 
 export const REQUEST_STATUS: Option[] = [

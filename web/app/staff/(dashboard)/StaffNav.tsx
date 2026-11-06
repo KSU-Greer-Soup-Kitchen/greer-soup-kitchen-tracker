@@ -10,6 +10,8 @@ const LINKS: { href: string; label: string; icon: IconName }[] = [
   { href: "/staff/donors", label: "Donors", icon: "heart" },
   { href: "/staff/volunteers", label: "Volunteers", icon: "users" },
   { href: "/staff/help", label: "Help requests", icon: "help" },
+  { href: "/staff/step", label: "STEP applications", icon: "home" },
+  { href: "/staff/messages", label: "Messages", icon: "inbox" },
   { href: "/staff/reports", label: "Reports", icon: "chart" },
   { href: "/staff/email", label: "Email volunteers", icon: "mail" },
 ];

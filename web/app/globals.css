@@ -517,6 +517,24 @@ fieldset {
   gap: 0 1.25rem;
 }
 
+/* STEP application: long form split into parts, one block per person */
+.step-part + .step-part {
+  margin-top: 2.25rem;
+}
+.step-person {
+  border-left: 4px solid var(--step);
+  padding-left: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.step-person h3 {
+  color: var(--step);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.step-add {
+  margin-bottom: 1rem;
+}
+
 .field.has-error input,
 .field.has-error select,
 .field.has-error textarea,
@@ -581,6 +599,13 @@ fieldset {
 .alert-error {
   background: var(--error-bg);
   color: var(--error);
+}
+.alert-warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.alert-warn a {
+  color: var(--warn);
 }
 .alert-success {
   background: var(--success-bg);

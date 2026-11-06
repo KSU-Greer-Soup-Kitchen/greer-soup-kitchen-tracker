@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PublicPage } from "../components/SiteChrome";
 import { HelpForm } from "./HelpForm";
 
@@ -13,6 +14,17 @@ export default function GetHelpPage() {
           <p>
             <strong>Just need a meal?</strong> You do not need to fill out a form. Come by 521 E. Poinsett St. Monday to Saturday for lunch at 11:30 AM,
             or Sunday for supper at 4:00 PM.
+          </p>
+        </div>
+        <div className="note">
+          <p>
+            <strong>Is your family homeless?</strong> Greer STEP gives families a place to live for up to two years while they get back on their
+            feet.
+          </p>
+          <p>
+            <Link className="button" href="/step-application">
+              Apply for the STEP family shelter
+            </Link>
           </p>
         </div>
         <HelpForm />
